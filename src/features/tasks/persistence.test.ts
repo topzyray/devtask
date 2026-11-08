@@ -62,6 +62,27 @@ describe('task persistence', () => {
     }
   })
 
+  it('keeps valid tasks when stored data is only partly valid', () => {
+    const storage = createMemoryStorage()
+    const kept = createTask(input({ title: 'Keep me' }), now, 'keep')
+    storage.setItem(
+      TASKS_STORAGE_KEY,
+      JSON.stringify([kept, { ...kept, id: 'drop', priority: 'urgent' }, kept]),
+    )
+
+    const result = readTasks(storage)
+
+    expect(result.corrupted).toBe(true)
+    expect(result.tasks).toEqual([kept])
+    expect(JSON.parse(storage.getItem(TASKS_STORAGE_KEY) ?? 'null')).toEqual([kept])
+  })
+
+  it('treats an empty stored string as unusable', () => {
+    const storage = createMemoryStorage({ [TASKS_STORAGE_KEY]: '   ' })
+    expect(readTasks(storage)).toEqual({ tasks: [], corrupted: true })
+    expect(storage.getItem(TASKS_STORAGE_KEY)).toBeNull()
+  })
+
   it('treats a storage read failure as unusable data', () => {
     const storage = createMemoryStorage({ [TASKS_STORAGE_KEY]: '[]' })
     storage.getItem = () => {

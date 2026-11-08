@@ -48,7 +48,8 @@ export function DashboardPage() {
                     <button
                       type="button"
                       onClick={() => openEdit(task.id)}
-                      className="flex w-full items-start justify-between gap-3 py-3 text-left hover:text-accent"
+                      aria-label={`Edit ${task.title}`}
+                      className="flex w-full items-start justify-between gap-3 rounded-lg py-3 text-left hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                     >
                       <span>
                         <span className="block font-medium text-ink">{task.title}</span>
@@ -69,7 +70,8 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => openEdit(task.id)}
-                    className="flex w-full items-start justify-between gap-3 py-3 text-left"
+                    aria-label={`Edit ${task.title}`}
+                    className="flex w-full items-start justify-between gap-3 rounded-lg py-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                   >
                     <span>
                       <span className="block font-medium text-ink">{task.title}</span>

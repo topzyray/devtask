@@ -1,5 +1,15 @@
-import { DEFAULT_TASK_QUERY, SORT_LABELS, STATUS_LABELS, TASK_PRIORITIES, TASK_SORTS, TASK_STATUSES, PRIORITY_LABELS } from '../types.ts'
-import type { PriorityFilter, StatusFilter, TaskSort } from '../types.ts'
+import {
+  DEFAULT_TASK_QUERY,
+  isPriorityFilter,
+  isStatusFilter,
+  isTaskSort,
+  PRIORITY_LABELS,
+  SORT_LABELS,
+  STATUS_LABELS,
+  TASK_PRIORITIES,
+  TASK_SORTS,
+  TASK_STATUSES,
+} from '../types.ts'
 import { useTaskStore } from '../store.ts'
 import { fieldClass, ghostButton, labelClass } from '../../layout/styles.ts'
 
@@ -42,7 +52,10 @@ export function TaskFilters() {
         <select
           id="task-status-filter"
           value={status}
-          onChange={(event) => setStatus(event.target.value as StatusFilter)}
+          onChange={(event) => {
+            const next = event.target.value
+            if (isStatusFilter(next)) setStatus(next)
+          }}
           className={fieldClass}
         >
           <option value="all">All statuses</option>
@@ -60,7 +73,10 @@ export function TaskFilters() {
         <select
           id="task-priority-filter"
           value={priority}
-          onChange={(event) => setPriority(event.target.value as PriorityFilter)}
+          onChange={(event) => {
+            const next = event.target.value
+            if (isPriorityFilter(next)) setPriority(next)
+          }}
           className={fieldClass}
         >
           <option value="all">All priorities</option>
@@ -78,7 +94,10 @@ export function TaskFilters() {
         <select
           id="task-sort"
           value={sort}
-          onChange={(event) => setSort(event.target.value as TaskSort)}
+          onChange={(event) => {
+            const next = event.target.value
+            if (isTaskSort(next)) setSort(next)
+          }}
           className={fieldClass}
         >
           {TASK_SORTS.map((item) => (

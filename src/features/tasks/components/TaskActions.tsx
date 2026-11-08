@@ -1,7 +1,7 @@
 import { fieldClass, ghostButton } from '../../layout/styles.ts'
 import { useUiStore } from '../../layout/ui-store.ts'
 import { useTaskStore } from '../store.ts'
-import { STATUS_LABELS, TASK_STATUSES, type Task, type TaskStatus } from '../types.ts'
+import { isTaskStatus, STATUS_LABELS, TASK_STATUSES, type Task } from '../types.ts'
 
 type TaskActionsProps = {
   task: Task
@@ -15,14 +15,17 @@ export function TaskActions({ task }: TaskActionsProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="min-w-36 flex-1 sm:flex-none">
+      <div className="w-full sm:w-40">
         <label htmlFor={statusId} className="sr-only">
           Status for {task.title}
         </label>
         <select
           id={statusId}
           value={task.status}
-          onChange={(event) => updateTaskStatus(task.id, event.target.value as TaskStatus)}
+          onChange={(event) => {
+            const next = event.target.value
+            if (isTaskStatus(next)) updateTaskStatus(task.id, next)
+          }}
           className={fieldClass}
         >
           {TASK_STATUSES.map((status) => (
@@ -32,10 +35,15 @@ export function TaskActions({ task }: TaskActionsProps) {
           ))}
         </select>
       </div>
-      <button type="button" className={ghostButton} onClick={() => openEdit(task.id)}>
+      <button type="button" className={ghostButton} onClick={() => openEdit(task.id)} aria-label={`Edit ${task.title}`}>
         Edit
       </button>
-      <button type="button" className={`${ghostButton} text-rose-700 hover:text-rose-800`} onClick={() => openDelete(task.id)}>
+      <button
+        type="button"
+        className={`${ghostButton} text-danger hover:opacity-80`}
+        onClick={() => openDelete(task.id)}
+        aria-label={`Delete ${task.title}`}
+      >
         Delete
       </button>
     </div>

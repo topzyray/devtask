@@ -11,7 +11,10 @@ export function isValidDateOnly(value: string): boolean {
   const year = Number(match[1])
   const month = Number(match[2])
   const day = Number(match[3])
-  const date = new Date(year, month - 1, day)
+  if (month < 1 || month > 12 || day < 1 || day > 31) return false
+  // setFullYear avoids the Date constructor mapping years 0–99 to 1900–1999.
+  const date = new Date(0)
+  date.setFullYear(year, month - 1, day)
   return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
 }
 

@@ -141,4 +141,46 @@ describe('computeStats', () => {
       overdue: 0,
     })
   })
+
+  it('rounds completion and keeps status counts equal to the total', () => {
+    const today = new Date(2026, 10, 8, 12, 0, 0)
+    const tasks = [
+      createTask(input({ status: 'completed', dueDate: '2026-11-01' }), today, '1'),
+      createTask(input({ status: 'completed', dueDate: '' }), today, '2'),
+      createTask(input({ status: 'pending', dueDate: '2026-11-09' }), today, '3'),
+    ]
+    const stats = computeStats(tasks, today)
+    expect(stats.pending + stats.inProgress + stats.completed).toBe(stats.total)
+    expect(stats.completionPercentage).toBe(67)
+    expect(stats.overdue).toBe(0)
+  })
+
+  it('does not treat an impossible due date as overdue', () => {
+    const task = {
+      ...createTask(input({ dueDate: '2026-11-01' }), now, 'bad-date'),
+      dueDate: '2026-02-31',
+    }
+    expect(isTaskOverdue(task, '2026-11-08')).toBe(false)
+  })
+})
+
+describe('queryTasks immutability', () => {
+  it('does not change the original task list', () => {
+    const tasks = [createTask(input({ title: 'Alpha' }), now, '1'), createTask(input({ title: 'Beta' }), now, '2')]
+    const snapshot = tasks.map((task) => ({ ...task }))
+    queryTasks(tasks, query({ search: 'alpha', sort: 'dueDate-desc' }))
+    expect(tasks).toEqual(snapshot)
+  })
+
+  it('treats a blank search as no search', () => {
+    const tasks = [createTask(input({ title: 'Alpha' }), now, '1')]
+    expect(queryTasks(tasks, query({ search: '   ' }))).toEqual(tasks)
+  })
+})
+
+describe('invalid due dates', () => {
+  it('does not store an impossible calendar date', () => {
+    expect(createTask(input({ dueDate: '2026-02-31' }), now, '1').dueDate).toBeNull()
+    expect(createTask(input({ dueDate: '2026-11-10' }), now, '2').dueDate).toBe('2026-11-10')
+  })
 })

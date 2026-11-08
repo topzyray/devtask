@@ -3,7 +3,7 @@ import { readTasks, writeTasks } from './persistence.ts'
 import { taskInputSchema } from './schema.ts'
 import { changeTaskStatus, createTask, removeTask, updateTask } from './task-logic.ts'
 import type { PriorityFilter, StatusFilter, Task, TaskInput, TaskSort, TaskStatus } from './types.ts'
-import { DEFAULT_TASK_QUERY } from './types.ts'
+import { DEFAULT_TASK_QUERY, isPriorityFilter, isStatusFilter, isTaskSort, isTaskStatus } from './types.ts'
 
 export type TaskState = {
   tasks: Task[]
@@ -50,9 +50,18 @@ export function createTaskStore(storage: Storage): UseBoundStore<StoreApi<TaskSt
     priority: DEFAULT_TASK_QUERY.priority,
     sort: DEFAULT_TASK_QUERY.sort,
     setSearch: (search) => set({ search }),
-    setStatus: (status) => set({ status }),
-    setPriority: (priority) => set({ priority }),
-    setSort: (sort) => set({ sort }),
+    setStatus: (status) => {
+      if (!isStatusFilter(status)) return
+      set({ status })
+    },
+    setPriority: (priority) => {
+      if (!isPriorityFilter(priority)) return
+      set({ priority })
+    },
+    setSort: (sort) => {
+      if (!isTaskSort(sort)) return
+      set({ sort })
+    },
     resetFilters: () =>
       set({
         search: DEFAULT_TASK_QUERY.search,
@@ -80,6 +89,7 @@ export function createTaskStore(storage: Storage): UseBoundStore<StoreApi<TaskSt
       return true
     },
     updateTaskStatus: (id, status) => {
+      if (!isTaskStatus(status)) return
       const current = get().tasks
       const existing = current.find((task) => task.id === id)
       if (!existing || existing.status === status) return

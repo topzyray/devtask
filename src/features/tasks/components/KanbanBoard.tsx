@@ -1,4 +1,4 @@
-import { useState, type DragEvent } from 'react'
+import { useRef, useState, type DragEvent } from 'react'
 import { formatDueDate } from '../../../lib/date.ts'
 import { cn } from '../../../lib/cn.ts'
 import { GripIcon } from '../../layout/icons.tsx'
@@ -14,10 +14,18 @@ type KanbanBoardProps = {
 
 export function KanbanBoard({ tasks }: KanbanBoardProps) {
   const updateTaskStatus = useTaskStore((state) => state.updateTaskStatus)
+  const draggedIdRef = useRef<string | null>(null)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [dropStatus, setDropStatus] = useState<TaskStatus | null>(null)
 
+  function clearDrag() {
+    draggedIdRef.current = null
+    setDraggedId(null)
+    setDropStatus(null)
+  }
+
   function onDragStart(event: DragEvent<HTMLButtonElement>, taskId: string) {
+    draggedIdRef.current = taskId
     event.dataTransfer.setData('text/plain', taskId)
     event.dataTransfer.effectAllowed = 'move'
     setDraggedId(taskId)
@@ -25,10 +33,9 @@ export function KanbanBoard({ tasks }: KanbanBoardProps) {
 
   function onDrop(event: DragEvent<HTMLElement>, status: TaskStatus) {
     event.preventDefault()
-    const taskId = event.dataTransfer.getData('text/plain') || draggedId
+    const taskId = event.dataTransfer.getData('text/plain') || draggedIdRef.current
     if (taskId) updateTaskStatus(taskId, status)
-    setDraggedId(null)
-    setDropStatus(null)
+    clearDrag()
   }
 
   return (
@@ -41,13 +48,13 @@ export function KanbanBoard({ tasks }: KanbanBoardProps) {
             key={status}
             aria-label={STATUS_LABELS[status]}
             className={cn(
-              'flex min-h-64 flex-col rounded-2xl border border-line bg-canvas/70 p-3',
+              'flex min-h-36 flex-col rounded-2xl border border-line bg-canvas/70 p-3 lg:min-h-64',
               activeDrop && 'border-accent bg-brand-soft',
             )}
             onDragOver={(event) => {
               event.preventDefault()
               event.dataTransfer.dropEffect = 'move'
-              setDropStatus(status)
+              setDropStatus((current) => (current === status ? current : status))
             }}
             onDragLeave={(event) => {
               if (event.currentTarget.contains(event.relatedTarget as Node | null)) return
@@ -72,12 +79,9 @@ export function KanbanBoard({ tasks }: KanbanBoardProps) {
                         type="button"
                         draggable
                         onDragStart={(event) => onDragStart(event, task.id)}
-                        onDragEnd={() => {
-                          setDraggedId(null)
-                          setDropStatus(null)
-                        }}
+                        onDragEnd={clearDrag}
                         aria-label={`Drag ${task.title}`}
-                        className="mt-0.5 cursor-grab rounded-md p-1 text-muted hover:bg-canvas active:cursor-grabbing"
+                        className="mt-0.5 hidden cursor-grab rounded-md p-1 text-muted hover:bg-canvas active:cursor-grabbing lg:inline-flex"
                       >
                         <GripIcon className="h-4 w-4" />
                       </button>

@@ -1,4 +1,4 @@
-import { toDateOnly } from '../../lib/date.ts'
+import { isValidDateOnly, toDateOnly } from '../../lib/date.ts'
 import type { Task, TaskInput, TaskQuery, TaskSort, TaskStats, TaskStatus } from './types.ts'
 
 export function createId(): string {
@@ -46,6 +46,7 @@ export function removeTask(tasks: readonly Task[], id: string): Task[] {
 
 export function isTaskOverdue(task: Task, today = toDateOnly(new Date())): boolean {
   if (task.status === 'completed' || task.dueDate === null) return false
+  if (!isValidDateOnly(task.dueDate) || !isValidDateOnly(today)) return false
   return task.dueDate < today
 }
 
@@ -97,7 +98,8 @@ export function taskToInput(task: Task): TaskInput {
 
 function blankToNull(value: string): string | null {
   const trimmed = value.trim()
-  return trimmed === '' ? null : trimmed
+  if (trimmed === '' || !isValidDateOnly(trimmed)) return null
+  return trimmed
 }
 
 function compareTasks(left: Task, right: Task, sort: TaskSort): number {

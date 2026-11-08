@@ -1,4 +1,4 @@
-import { taskListSchema } from './schema.ts'
+import { taskSchema } from './schema.ts'
 import type { Task } from './types.ts'
 
 export const TASKS_STORAGE_KEY = 'devtask.tasks'
@@ -17,19 +17,48 @@ export function readTasks(storage: Storage): ReadTasksResult {
   }
 
   if (raw === null) return { tasks: [], corrupted: false }
+  if (raw.trim() === '') {
+    clearTasks(storage)
+    return { tasks: [], corrupted: true }
+  }
 
+  let parsed: unknown
   try {
-    const parsed: unknown = JSON.parse(raw)
-    const result = taskListSchema.safeParse(parsed)
-    if (!result.success) {
-      clearTasks(storage)
-      return { tasks: [], corrupted: true }
-    }
-    return { tasks: result.data, corrupted: false }
+    parsed = JSON.parse(raw)
   } catch {
     clearTasks(storage)
     return { tasks: [], corrupted: true }
   }
+
+  if (!Array.isArray(parsed)) {
+    clearTasks(storage)
+    return { tasks: [], corrupted: true }
+  }
+
+  const tasks: Task[] = []
+  const seenIds = new Set<string>()
+  let dropped = false
+
+  for (const item of parsed) {
+    const result = taskSchema.safeParse(item)
+    if (!result.success || seenIds.has(result.data.id)) {
+      dropped = true
+      continue
+    }
+    seenIds.add(result.data.id)
+    tasks.push(result.data)
+  }
+
+  if (!dropped) return { tasks, corrupted: false }
+
+  try {
+    if (tasks.length === 0) clearTasks(storage)
+    else writeTasks(storage, tasks)
+  } catch {
+    // The repaired list is still returned for this session.
+  }
+
+  return { tasks, corrupted: true }
 }
 
 export function writeTasks(storage: Storage, tasks: readonly Task[]): void {

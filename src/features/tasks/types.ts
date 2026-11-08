@@ -72,6 +72,26 @@ export const PRIORITY_LABELS: Record<TaskPriority, string> = {
   high: 'High',
 }
 
+export function isTaskStatus(value: string): value is TaskStatus {
+  return TASK_STATUSES.some((status) => status === value)
+}
+
+export function isTaskPriority(value: string): value is TaskPriority {
+  return TASK_PRIORITIES.some((priority) => priority === value)
+}
+
+export function isTaskSort(value: string): value is TaskSort {
+  return TASK_SORTS.some((sort) => sort === value)
+}
+
+export function isStatusFilter(value: string): value is StatusFilter {
+  return value === 'all' || isTaskStatus(value)
+}
+
+export function isPriorityFilter(value: string): value is PriorityFilter {
+  return value === 'all' || isTaskPriority(value)
+}
+
 export const SORT_LABELS: Record<TaskSort, string> = {
   'dueDate-asc': 'Due date (soonest)',
   'dueDate-desc': 'Due date (latest)',

@@ -17,8 +17,9 @@ export function BoardPage() {
   return (
     <div className="space-y-4">
       <TaskFilters />
-      <p className="text-sm text-muted">
-        Drag a card into another column, or change its status. Columns stay in Pending, In progress, and Completed order.
+      <p className="text-sm text-muted" aria-live="polite">
+        Showing {visible.length} of {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}. Change a status to move a
+        task. On a wide screen you can also drag a card between columns.
       </p>
       {tasks.length === 0 ? (
         <section className="rounded-2xl border border-dashed border-line bg-surface px-6 py-12 text-center">

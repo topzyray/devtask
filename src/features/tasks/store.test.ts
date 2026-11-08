@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { TASKS_STORAGE_KEY } from './persistence.ts'
 import { createTaskStore } from './store.ts'
 import { createMemoryStorage } from './test-support.ts'
-import type { TaskInput } from './types.ts'
+import type { PriorityFilter, StatusFilter, TaskInput, TaskSort, TaskStatus } from './types.ts'
 
 function input(overrides: Partial<TaskInput> = {}): TaskInput {
   return {
@@ -103,5 +103,33 @@ describe('task store', () => {
     expect(store.getState().search).toBe('')
     expect(store.getState().status).toBe('all')
     expect(store.getState().priority).toBe('all')
+  })
+
+  it('ignores filter and status values that are not part of the task model', () => {
+    const store = createTaskStore(createMemoryStorage())
+    expect(store.getState().addTask(input())).toBe(true)
+    const id = store.getState().tasks[0]?.id ?? ''
+
+    store.getState().setStatus('archived' as StatusFilter)
+    store.getState().setPriority('urgent' as PriorityFilter)
+    store.getState().setSort('title' as TaskSort)
+    store.getState().updateTaskStatus(id, 'done' as TaskStatus)
+
+    expect(store.getState().status).toBe('all')
+    expect(store.getState().priority).toBe('all')
+    expect(store.getState().sort).toBe('dueDate-asc')
+    expect(store.getState().tasks[0]?.status).toBe('pending')
+  })
+
+  it('loads the valid tasks from a partly corrupt saved list', () => {
+    const storage = createMemoryStorage()
+    const first = createTaskStore(storage)
+    expect(first.getState().addTask(input({ title: 'Still here' }))).toBe(true)
+    const saved = first.getState().tasks[0]
+    storage.setItem(TASKS_STORAGE_KEY, JSON.stringify([saved, { title: 'Broken' }]))
+
+    const restored = createTaskStore(storage)
+    expect(restored.getState().corrupted).toBe(true)
+    expect(restored.getState().tasks.map((task) => task.title)).toEqual(['Still here'])
   })
 })

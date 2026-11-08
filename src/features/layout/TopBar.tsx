@@ -44,9 +44,10 @@ export function TopBar() {
         {theme === 'dark' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
         <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
       </button>
-      <button type="button" className={primaryButton} onClick={openCreate}>
+      <button type="button" className={`${primaryButton} px-3 sm:px-3.5`} onClick={openCreate} aria-label="New task">
         <PlusIcon className="h-4 w-4" />
-        New task
+        <span className="sm:hidden">New</span>
+        <span className="hidden sm:inline">New task</span>
       </button>
     </header>
   )

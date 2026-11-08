@@ -21,11 +21,13 @@ export function Dialog({ title, description, onClose, children }: DialogProps) {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
-    const panel = panelRef.current
-    const focusable = panel
-      ? [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((element) => !element.hasAttribute('disabled'))
-      : []
-    focusable[0]?.focus()
+    function getFocusable(): HTMLElement[] {
+      const panel = panelRef.current
+      if (!panel) return []
+      return [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((element) => !element.hasAttribute('disabled'))
+    }
+
+    getFocusable()[0]?.focus()
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -33,14 +35,22 @@ export function Dialog({ title, description, onClose, children }: DialogProps) {
         onClose()
         return
       }
-      if (event.key !== 'Tab' || focusable.length === 0) return
+      if (event.key !== 'Tab') return
+      const focusable = getFocusable()
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
       if (!first || !last) return
-      if (event.shiftKey && document.activeElement === first) {
+      const active = document.activeElement
+      const inside = panelRef.current?.contains(active instanceof Node ? active : null) ?? false
+      if (!inside) {
+        event.preventDefault()
+        ;(event.shiftKey ? last : first).focus()
+        return
+      }
+      if (event.shiftKey && active === first) {
         event.preventDefault()
         last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && active === last) {
         event.preventDefault()
         first.focus()
       }

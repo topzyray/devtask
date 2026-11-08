@@ -91,7 +91,7 @@ function TaskForm({ taskId }: { taskId: string | null }) {
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {formError ? (
-          <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800">
+          <p role="alert" className="rounded-lg border border-danger/40 bg-surface px-3 py-2 text-sm text-danger">
             {formError}
           </p>
         ) : null}
@@ -114,14 +114,14 @@ function TaskForm({ taskId }: { taskId: string | null }) {
             autoComplete="off"
           />
           {errors.title ? (
-            <p id={`${titleId}-error`} className="mt-1.5 text-sm text-rose-700">
+            <p id={`${titleId}-error`} className="mt-1.5 text-sm text-danger">
               {errors.title}
             </p>
           ) : null}
         </div>
         <div>
           <label htmlFor={descriptionId} className={labelClass}>
-            Description
+            Description <span className="font-normal text-muted">(optional)</span>
           </label>
           <textarea
             id={descriptionId}
@@ -135,7 +135,7 @@ function TaskForm({ taskId }: { taskId: string | null }) {
             className={fieldClass}
           />
           {errors.description ? (
-            <p id={`${descriptionId}-error`} className="mt-1.5 text-sm text-rose-700">
+            <p id={`${descriptionId}-error`} className="mt-1.5 text-sm text-danger">
               {errors.description}
             </p>
           ) : null}
@@ -173,7 +173,7 @@ function TaskForm({ taskId }: { taskId: string | null }) {
             className={fieldClass}
           />
           {errors.dueDate ? (
-            <p id={`${dueDateId}-error`} className="mt-1.5 text-sm text-rose-700">
+            <p id={`${dueDateId}-error`} className="mt-1.5 text-sm text-danger">
               {errors.dueDate}
             </p>
           ) : null}
@@ -204,7 +204,7 @@ type ChoiceGroupProps<T extends string> = {
 function ChoiceGroup<T extends string>({ id, legend, name, value, options, onChange, error }: ChoiceGroupProps<T>) {
   const errorId = `${id}-error`
   return (
-    <fieldset id={id} aria-describedby={error ? errorId : undefined}>
+    <fieldset id={id} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined}>
       <legend className={labelClass}>{legend}</legend>
       <div className="grid grid-cols-3 gap-2">
         {options.map((option) => {
@@ -213,7 +213,7 @@ function ChoiceGroup<T extends string>({ id, legend, name, value, options, onCha
             <label
               key={option.value}
               className={cn(
-                'cursor-pointer rounded-lg border px-2 py-2 text-center text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand',
+                'cursor-pointer rounded-lg border px-1.5 py-2 text-center text-xs font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand sm:px-2 sm:text-sm',
                 selected ? 'border-accent bg-brand-soft text-accent' : 'border-line bg-surface text-ink hover:bg-canvas',
               )}
             >
@@ -231,7 +231,7 @@ function ChoiceGroup<T extends string>({ id, legend, name, value, options, onCha
         })}
       </div>
       {error ? (
-        <p id={errorId} className="mt-1.5 text-sm text-rose-700">
+        <p id={errorId} className="mt-1.5 text-sm text-danger">
           {error}
         </p>
       ) : null}

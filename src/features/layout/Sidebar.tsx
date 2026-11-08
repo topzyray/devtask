@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTaskStore } from '../tasks/store.ts'
 import { BoardIcon, CloseIcon, DashboardIcon, ListIcon } from './icons.tsx'
 import { useUiStore, type AppView } from './ui-store.ts'
@@ -33,15 +33,25 @@ export function Sidebar() {
   const taskCount = useTaskStore((state) => state.tasks.length)
   const isNarrow = useNarrowScreen()
   const drawerHidden = isNarrow && !mobileNavOpen
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    if (!mobileNavOpen) return
+    if (!isNarrow || !mobileNavOpen) return
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    closeButtonRef.current?.focus()
+
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') setMobileNavOpen(false)
     }
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [mobileNavOpen, setMobileNavOpen])
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = previousOverflow
+      previouslyFocused?.focus()
+    }
+  }, [isNarrow, mobileNavOpen, setMobileNavOpen])
 
   return (
     <>
@@ -73,6 +83,7 @@ export function Sidebar() {
             </span>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             className="inline-flex rounded-lg p-2 text-stone-300 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200 lg:hidden"
             onClick={() => setMobileNavOpen(false)}
