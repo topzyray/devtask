@@ -2,7 +2,7 @@
 
 DevTask is a small task dashboard for daily engineering work. You can create, edit, and delete tasks, then review them on a dashboard, in a list, or on a three-column board. Counts, overdue work, and completion stay in sync, and tasks come back from the browser after a refresh.
 
-This is the project for **Challenge 1: Build a Mini App with Cursor**.
+This is the project for **Challenge 1: Build a Mini App with Cursor** and **Use GitHub Copilot to Build a Simple Application**.
 
 ## Features
 
@@ -31,6 +31,7 @@ Search matches the title only. Status, priority, and search filters apply togeth
 - Zustand for task, view, and theme state
 - Zod for form and stored-data validation
 - Vitest and jsdom for unit tests
+- Cursor, Github Copilot
 
 No environment variables are required.
 
