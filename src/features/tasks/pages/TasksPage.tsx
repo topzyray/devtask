@@ -1,9 +1,10 @@
 import { useTaskStore } from '../store.ts'
 import { queryTasks } from '../task-logic.ts'
-import { primaryButton } from '../../layout/styles.ts'
+import { primaryButton, secondaryButton } from '../../layout/styles.ts'
 import { useUiStore } from '../../layout/ui-store.ts'
 import { TaskFilters } from '../components/TaskFilters.tsx'
 import { TaskList } from '../components/TaskList.tsx'
+import { downloadTasksCsv } from '../csv-export.ts'
 
 export function TasksPage() {
   const tasks = useTaskStore((state) => state.tasks)
@@ -16,6 +17,11 @@ export function TasksPage() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <button type="button" className={secondaryButton} onClick={() => downloadTasksCsv(tasks)}>
+          Export CSV
+        </button>
+      </div>
       <TaskFilters />
       <p className="text-sm text-muted" aria-live="polite">
         Showing {visible.length} of {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
